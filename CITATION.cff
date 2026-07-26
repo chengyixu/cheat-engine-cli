@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use Cheat Engine CLI in research or tooling, cite this repository."
+title: "Cheat Engine CLI"
+type: software
+authors:
+  - family-names: "Xu"
+    given-names: "Wilson"
+repository-code: "https://github.com/chengyixu/cheat-engine-cli"
+url: "https://chengyixu.github.io/cheat-engine-cli/"
+abstract: "A JSON-first command-line client for authorized process and memory inspection through the upstream Cheat Engine ceserver protocol."
+keywords:
+  - cheat-engine
+  - ceserver
+  - command-line-interface
+  - process-memory
+  - memory-scanner
+  - ai-agent
+version: 0.1.0

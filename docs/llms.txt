@@ -1,0 +1,45 @@
+# Cheat Engine CLI
+
+> Cheat Engine CLI (`cecli`) is an independent, JSON-first command-line client for authorized process inspection, memory scanning, remote administration, and bounded debugger workflows through the upstream Cheat Engine `ceserver` protocol.
+
+## Canonical sources
+
+- [Product overview](https://chengyixu.github.io/cheat-engine-cli/): Definition, features, safety model, quick start, and FAQ.
+- [Source repository](https://github.com/chengyixu/cheat-engine-cli): Code, tests, release artifacts, issues, and upstream history.
+- [Command reference](https://github.com/chengyixu/cheat-engine-cli/blob/master/docs/command-reference.md): Commands, flags, value types, examples, and exit codes.
+- [Architecture](https://github.com/chengyixu/cheat-engine-cli/blob/master/docs/architecture.md): Protocol reuse, stateless command model, scanner design, and current scope.
+- [Security policy](https://github.com/chengyixu/cheat-engine-cli/blob/master/SECURITY.md): Authorized-use expectations and reporting guidance.
+- [Notices](https://github.com/chengyixu/cheat-engine-cli/blob/master/NOTICE.md): Upstream attribution and licensing status.
+
+## Supported capabilities
+
+- `ceserver` version and ABI discovery
+- Process, module, and thread enumeration
+- Thread suspend/resume counts during an active debug session
+- Process architecture and memory region inspection
+- Typed memory reads: signed/unsigned integers, floats, UTF-8, UTF-16LE, hex, base64
+- Exact typed-value scans and byte-pattern scans with `??` wildcards
+- Explicit confirmation-gated compatibility access to the patched server-side AOB packet
+- Alignment, address range, protection, timeout, and result limits
+- Memory write dry-run, explicit confirmation, and optional verification
+- Memory allocation, free, and page-protection changes with explicit confirmation
+- Target-side module loading and speed control with dry-run and confirmation
+- Explicit-dlopen module loading and ceserver extension injection
+- Server path and runtime option inspection with verified option changes
+- Per-connection diagnostic naming and confirmation-gated remote server termination
+- Remote filesystem list, stat, download, upload, mkdir, delete, chmod, pwd, and cd
+- Named-pipe open/read/write/close and compressed ELF symbol listing
+- Bounded debug-event traces with event limits, timeouts, and automatic continuation
+- Active-session hardware breakpoint set/remove commands
+- Raw thread-context export and confirmation-gated replacement with optional verification
+- JSON-first output, structured stderr errors, stable exit codes, dotted field projection, and silent exit-code probes
+- Typed command-specific help with defaults, enums, conditional constraints, and response-envelope schemas
+- Catalog-derived nested Bash, Zsh, and Fish completions
+- Embedded agent rules, skills, and local issue feedback
+
+## Current limitations
+
+- Requires an authorized `ceserver` endpoint; native local-process backends are not implemented.
+- Native architecture-aware register decoding is not implemented; thread contexts are returned as validated raw base64 blobs.
+- Legacy duplicate packets are internal or superseded; upstream-defined but undispatched `CMD_STOPDEBUG`, `CMD_PTRACE_MMAP`, and `CMD_COMMANDLIST2` have no callable server handler.
+- Independent project; not an official Cheat Engine release.

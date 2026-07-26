@@ -313,6 +313,12 @@ int DispatchCommand(int currentsocket, unsigned char command)
 
     case CMD_CLOSECONNECTION:
     {
+      if (isDebuggerThread)
+      {
+        StopDebug(isDebuggerThread);
+        isDebuggerThread=0;
+        debugfd=-1;
+      }
       debug_log("Connection %d closed properly\n", currentsocket);
       fflush(stdout);
       close(currentsocket);
@@ -1011,8 +1017,8 @@ case CMD_SETTHREADCONTEXT:
       r=recvall(currentsocket, &c, sizeof(c), MSG_WAITALL);
       if (r>0)
       {
-        RegionInfo rinfo;
-        CeVirtualQueryExOutput o;
+        RegionInfo rinfo={0};
+        CeVirtualQueryExOutput o={0};
 
         if (sizeof(uintptr_t)==4)
         {
@@ -1024,7 +1030,7 @@ case CMD_SETTHREADCONTEXT:
           }
         }
 
-        char mapsline[200];
+        char mapsline[200]={0};
 
         if (command==CMD_VIRTUALQUERYEX)
           o.result=VirtualQueryEx(c.handle, (void *)(uintptr_t)c.baseaddress, &rinfo, NULL);
@@ -1205,7 +1211,7 @@ case CMD_SETTHREADCONTEXT:
       {
         uint64_t th;
         HANDLE h;
-        th=ext_createThread(c.hProcess, c.startaddress, c.startaddress);
+        th=ext_createThread(c.hProcess, c.startaddress, c.parameter);
 
         debug_log("returned from ext_createthread\n");
 
@@ -1295,8 +1301,8 @@ case CMD_SETTHREADCONTEXT:
       if (recvall(currentsocket, &c, sizeof(c),0)>0)
       {
         RegionInfo ri;
-        uint32_t r;
-        uint32_t oldprotection;
+        uint32_t r=1;
+        uint32_t oldprotection=PAGE_NOACCESS;
         uint32_t newprotection;
 
         if (VirtualQueryEx(c.hProcess, (void*)c.address, &ri, NULL))
@@ -1550,6 +1556,8 @@ case CMD_SETTHREADCONTEXT:
         }
         else
           sendall(currentsocket, &filesize, sizeof(filesize),0); //filesize of 0
+
+        close(f);
       }
       else
       {
@@ -1576,8 +1584,18 @@ case CMD_SETTHREADCONTEXT:
       f=creat(path,0777);
       if (f!=-1)
       {
-        if (write(f,contents, filesize)!=-1)
-          r=1; //success
+        uint32_t totalwritten=0;
+        while (totalwritten<filesize)
+        {
+          ssize_t written=write(f,contents+totalwritten, filesize-totalwritten);
+          if (written<=0)
+            break;
+
+          totalwritten+=written;
+        }
+
+        r=totalwritten==filesize;
+        close(f);
       }
 
 
@@ -1636,25 +1654,41 @@ case CMD_SETTHREADCONTEXT:
 		debug_log("CESERVER: CMD_AOBSCAN\n");
 		if (recvall(currentsocket, &c, sizeof(c), 0) > 0)
 		{
-	
-			int n = c.scansize;
-			char* data = (char*)malloc(n*2);
-			uint64_t* match_addr = (uint64_t*)malloc(sizeof(uint64_t) * MAX_HIT_COUNT);
+			int ret=0;
+			int n=c.scansize;
+			char* data=NULL;
+			uint64_t* match_addr=NULL;
 
-			if (recvall(currentsocket, data, n*2, 0)>0)
+			if ((n>0) && (n<=MAX_AOB_PATTERN_SIZE))
 			{
-				char* pattern = (char*)malloc(n);
-				char* mask = (char*)malloc(n);
+				data=(char*)malloc((size_t)n*2);
+				match_addr=(uint64_t*)malloc(sizeof(uint64_t)*MAX_HIT_COUNT);
+				if ((data==NULL) || (match_addr==NULL))
+				{
+					free(data);
+					free(match_addr);
+					close(currentsocket);
+					return 0;
+				}
 
-				memcpy(pattern, data, n);
-				memcpy(mask, &data[n], n);
-				int ret = AOBScan(c.hProcess, pattern, mask, c.start, c.end, c.inc,c.protection, match_addr);
-				debug_log("HIT_COUNT:%d\n", ret);
-				free(pattern);
-				free(mask);
-				sendall(currentsocket, &ret, 4, 0);
-				sendall(currentsocket, match_addr, sizeof(uint64_t)* ret, 0);
+				if (recvall(currentsocket, data, (size_t)n*2, MSG_WAITALL)>0)
+				{
+					if ((c.inc>0) && (c.end>c.start))
+					{
+						ret=AOBScan(c.hProcess, data, &data[n], n, c.start, c.end, c.inc, c.protection, match_addr);
+						debug_log("HIT_COUNT:%d\n", ret);
+					}
+				}
 			}
+			else if (n>MAX_AOB_PATTERN_SIZE)
+			{
+				close(currentsocket);
+				return 0;
+			}
+
+			sendall(currentsocket, &ret, sizeof(ret), 0);
+			if (ret>0)
+				sendall(currentsocket, match_addr, sizeof(uint64_t)*(size_t)ret, 0);
 			free(data);
 			free(match_addr);
 		}

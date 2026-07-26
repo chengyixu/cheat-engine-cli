@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://chengyixu.github.io/cheat-engine-cli/sitemap.xml

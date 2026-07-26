@@ -1,0 +1,63 @@
+version: 2
+
+project_name: cecli
+
+before:
+  hooks:
+    - go mod tidy
+    - go test ./...
+
+builds:
+  - id: cecli
+    main: ./cmd/cecli
+    binary: cecli
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    flags:
+      - -trimpath
+    ldflags:
+      - >-
+        -s -w
+        -X github.com/chengyixu/cheat-engine-cli/internal/cli.Version={{.Version}}
+        -X github.com/chengyixu/cheat-engine-cli/internal/cli.Commit={{.Commit}}
+        -X github.com/chengyixu/cheat-engine-cli/internal/cli.BuildDate={{.Date}}
+
+archives:
+  - id: default
+    formats:
+      - tar.gz
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+    files:
+      - README.md
+      - CHANGELOG.md
+      - NOTICE.md
+      - SECURITY.md
+      - docs/command-reference.md
+
+checksum:
+  name_template: checksums.txt
+
+changelog:
+  use: github-native
+
+release:
+  prerelease: auto
+  footer: >-
+    This project is an independent CLI built on the upstream Cheat Engine ceserver protocol.
+    Review NOTICE.md before redistributing binaries that bundle upstream source or components.

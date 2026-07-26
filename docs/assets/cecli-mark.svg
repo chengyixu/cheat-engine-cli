@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">Cheat Engine CLI mark</title>
+  <desc id="desc">A terminal prompt combined with a memory scan grid.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#111827"/>
+      <stop offset="1" stop-color="#0f766e"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2dd4bf"/>
+      <stop offset="1" stop-color="#67e8f9"/>
+    </linearGradient>
+  </defs>
+  <rect width="256" height="256" rx="52" fill="url(#bg)"/>
+  <rect x="38" y="48" width="180" height="160" rx="20" fill="#07121f" stroke="#334155" stroke-width="6"/>
+  <circle cx="62" cy="70" r="6" fill="#fb7185"/>
+  <circle cx="82" cy="70" r="6" fill="#fbbf24"/>
+  <circle cx="102" cy="70" r="6" fill="#34d399"/>
+  <path d="M64 108l24 20-24 20" fill="none" stroke="url(#accent)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M104 150h46" fill="none" stroke="#e2e8f0" stroke-width="10" stroke-linecap="round"/>
+  <g fill="#2dd4bf">
+    <rect x="156" y="104" width="14" height="14" rx="3"/>
+    <rect x="178" y="104" width="14" height="14" rx="3" opacity=".45"/>
+    <rect x="156" y="126" width="14" height="14" rx="3" opacity=".45"/>
+    <rect x="178" y="126" width="14" height="14" rx="3"/>
+    <rect x="156" y="148" width="14" height="14" rx="3"/>
+    <rect x="178" y="148" width="14" height="14" rx="3" opacity=".45"/>
+  </g>
+</svg>

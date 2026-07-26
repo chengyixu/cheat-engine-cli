@@ -9,54 +9,102 @@
 #include "context.h"
 #include "native-api.h"
 
-DWORD AOBScan(HANDLE hProcess, const char* pattern, const char* mask, uint64_t start, uint64_t end, int inc, int protection,uint64_t * match_addr) {
+DWORD AOBScan(HANDLE hProcess, const char* pattern, const char* mask, int patternLength, uint64_t start, uint64_t end, int inc, int protection, uint64_t* match_addr) {
+  const uint64_t chunkSize=1024*1024;
+  int resultCount=0;
+  uint64_t cursor=start;
 
-	RegionInfo rinfo;
-	uint64_t tmp = start;
-	uint64_t tmp2 = tmp;
+  if ((pattern==NULL) || (mask==NULL) || (match_addr==NULL) || (patternLength<=0) || (patternLength>MAX_AOB_PATTERN_SIZE) || (inc<=0) || (end<=start))
+    return 0;
 
-	char* MemoryBuff = (char*)malloc(4096);
-	int patternLength = (int)strlen(mask);
+  size_t bufferSize=(size_t)chunkSize+(size_t)patternLength-1;
+  unsigned char *buffer=(unsigned char *)malloc(bufferSize);
+  if (buffer==NULL)
+    return 0;
 
-	int result_count = 0;
+  while (cursor<end)
+  {
+    RegionInfo rinfo={0};
+    if (!VirtualQueryEx(hProcess, (void *)(uintptr_t)cursor, &rinfo, NULL) || (rinfo.size==0))
+    {
+      uint64_t next=cursor+4096;
+      if (next<=cursor)
+        break;
+      cursor=next;
+      continue;
+    }
 
-	while (tmp < end) {
-		VirtualQueryEx(hProcess, (void*)tmp, &rinfo, NULL);
-		if (rinfo.size == 0) {
-			return -1;
-		}
-		if((rinfo.protection & protection) != 0)
-		{
-			tmp2 = tmp;
-			while (tmp2 < tmp + rinfo.size)
-			{
-				if (!ReadProcessMemory(hProcess, (void*)tmp2, MemoryBuff, 4096)) {
-					break;
-				}
+    uint64_t regionStart=rinfo.baseaddress>cursor ? rinfo.baseaddress : cursor;
+    uint64_t regionEnd;
+    if (UINT64_MAX-rinfo.baseaddress<rinfo.size)
+      regionEnd=UINT64_MAX;
+    else
+      regionEnd=rinfo.baseaddress+rinfo.size;
+    if (regionEnd>end)
+      regionEnd=end;
 
-				for (int i = 0; i < 4096; i += inc)
-				{ 
-					for (int k = 0; k < patternLength; k++)
-					{
+    if (((rinfo.protection & protection)!=0) && (regionEnd>regionStart) && (regionEnd-regionStart>=(uint64_t)patternLength))
+    {
+      uint64_t address=regionStart;
+      while (address<regionEnd)
+      {
+        uint64_t remaining=regionEnd-address;
+        uint64_t requested=chunkSize+(uint64_t)patternLength-1;
+        if (requested>remaining)
+          requested=remaining;
 
-						if (!(mask[k] == '?' || pattern[k] == (MemoryBuff[k])))
-						{
-							goto label;
+        int bytesRead=ReadProcessMemory(hProcess, (void *)(uintptr_t)address, buffer, (int)requested);
+        if (bytesRead>=patternLength)
+        {
+          int candidateCount=bytesRead-patternLength+1;
+          if ((uint64_t)candidateCount>chunkSize)
+            candidateCount=(int)chunkSize;
 
-						}
-					}
-					match_addr[result_count] = tmp2;
-					result_count++;
-					if (result_count >= MAX_HIT_COUNT)return result_count;
-					
-				label:
-					tmp2 += inc; MemoryBuff += inc;
-				}
-				MemoryBuff -= 4096;
-			}
-		}
-		tmp += rinfo.size;
-	}
+          for (int offset=0; offset<candidateCount; offset++)
+          {
+            uint64_t candidate=address+(uint64_t)offset;
+            if (((candidate-start)%(uint64_t)inc)!=0)
+              continue;
 
-return result_count;
+            int matched=1;
+            for (int patternIndex=0; patternIndex<patternLength; patternIndex++)
+            {
+              if ((mask[patternIndex]!='?') && ((unsigned char)pattern[patternIndex]!=buffer[offset+patternIndex]))
+              {
+                matched=0;
+                break;
+              }
+            }
+            if (matched)
+            {
+              match_addr[resultCount++]=candidate;
+              if (resultCount>=MAX_HIT_COUNT)
+              {
+                free(buffer);
+                return resultCount;
+              }
+            }
+          }
+        }
+
+        uint64_t next=address+chunkSize;
+        if (next<=address)
+          break;
+        address=next;
+      }
+    }
+
+    if (regionEnd<=cursor)
+    {
+      uint64_t next=cursor+4096;
+      if (next<=cursor)
+        break;
+      cursor=next;
+    }
+    else
+      cursor=regionEnd;
+  }
+
+  free(buffer);
+  return resultCount;
 }

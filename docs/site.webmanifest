@@ -1,0 +1,12 @@
+{
+  "name": "Cheat Engine CLI",
+  "short_name": "cecli",
+  "description": "JSON-first process and memory inspection through Cheat Engine ceserver.",
+  "start_url": "/cheat-engine-cli/",
+  "display": "standalone",
+  "background_color": "#07111f",
+  "theme_color": "#07111f",
+  "icons": [
+    {"src": "assets/cecli-mark.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}
+  ]
+}
