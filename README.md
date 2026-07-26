@@ -55,7 +55,7 @@ Cheat Engine CLI (`cecli`) is a cross-platform, JSON-first command-line interfac
 The companion [Cheat Engine CLI Skill](https://github.com/chengyixu/cheat-engine-cli-skill) turns this command surface into a disciplined agent workflow: authorize, discover, map, read, scan, preview, confirm, verify, and restore. It includes English and Simplified Chinese guidance for native macOS, native Windows, and remote `ceserver` targets.
 
 ```bash
-npx skills add chengyixu/cheat-engine-cli-skill@cheat-engine-cli -g -y
+npx skills add chengyixu/cheat-engine-cli-skill@cheat-engine-cli -g -y --agent codex
 ```
 
 The skill links back to this repository as its canonical CLI implementation and command reference.

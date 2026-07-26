@@ -55,7 +55,7 @@ Cheat Engine CLI（`cecli`）是一个跨平台、JSON-first 的命令行接口�
 配套的 [Cheat Engine CLI Skill](https://github.com/chengyixu/cheat-engine-cli-skill) 把命令集合转化为严格的 Agent 流程：确认授权、发现目标、查看映射、读取、扫描、预览、确认、验证和恢复。它同时提供 English 与简体中文指引，覆盖 macOS 本机、Windows 本机和远程 `ceserver`。
 
 ```bash
-npx skills add chengyixu/cheat-engine-cli-skill@cheat-engine-cli -g -y
+npx skills add chengyixu/cheat-engine-cli-skill@cheat-engine-cli -g -y --agent codex
 ```
 
 Skill 会把本仓库作为 CLI 实现和命令参考的唯一规范来源。
