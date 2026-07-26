@@ -83,7 +83,7 @@ func (application *app) writeError(command string, err error) int {
 		if runtime.GOOS == "darwin" {
 			normalized.Suggestion = "Confirm the PID and permissions. Build and sign with 'make sign-macos-native'; macOS still blocks SIP-protected processes."
 		} else if runtime.GOOS == "windows" {
-			normalized.Suggestion = "Confirm the PID and run the terminal elevated when the target has higher integrity; protected processes remain unavailable."
+			normalized.Suggestion = "Confirm the PID and permissions. Run the terminal elevated when the target has higher integrity; protected processes remain unavailable."
 		}
 	}
 	if application.options.quiet {
