@@ -12,6 +12,9 @@ Do not include credentials, private memory dumps, exploit payloads, or personal 
 
 - Use `cecli` only on systems and processes you own or are explicitly authorized to inspect.
 - Bind `ceserver` to trusted interfaces and restrict access with host firewalls or authenticated tunnels.
+- Keep the optional `cebridge` bound to loopback unless a firewall or authenticated tunnel restricts every permitted client.
+- On macOS, sign only the intended `cecli` binary with `build/macos-debugger.entitlements`; debugger permission is powerful, does not bypass SIP, and should not be added to unrelated binaries.
+- On Windows, elevate `cecli --native` only when the authorized target requires matching integrity; do not use elevation to probe unrelated or protected processes.
 - Treat process memory as sensitive data.
 - Preview writes with `--dry-run`, require `--yes`, and prefer `--verify`.
 - Do not run remote file, injection, debugger, or termination capabilities without an explicit review of target authorization and rollback behavior.

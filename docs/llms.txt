@@ -1,6 +1,6 @@
 # Cheat Engine CLI
 
-> Cheat Engine CLI (`cecli`) is an independent, JSON-first command-line client for authorized process inspection, memory scanning, remote administration, and bounded debugger workflows through the upstream Cheat Engine `ceserver` protocol.
+> Cheat Engine CLI (`cecli`) is an independent, JSON-first command-line interface with native macOS and Windows process-memory access plus remote administration and bounded debugger workflows through the upstream Cheat Engine `ceserver` protocol.
 
 ## Canonical sources
 
@@ -13,6 +13,7 @@
 
 ## Supported capabilities
 
+- Native macOS and Windows process discovery, memory regions, reads, exact scans, and guarded writes with `--native`
 - `ceserver` version and ABI discovery
 - Process, module, and thread enumeration
 - Thread suspend/resume counts during an active debug session
@@ -39,7 +40,8 @@
 
 ## Current limitations
 
-- Requires an authorized `ceserver` endpoint; native local-process backends are not implemented.
+- Native mode currently covers the core process-memory subset; modules, threads, debugger controls, remote administration, allocation, and protection changes require a remote `ceserver` endpoint.
+- macOS native access requires a debugger-signed CLI and still cannot inspect SIP-protected processes; native Linux access is not implemented.
 - Native architecture-aware register decoding is not implemented; thread contexts are returned as validated raw base64 blobs.
 - Legacy duplicate packets are internal or superseded; upstream-defined but undispatched `CMD_STOPDEBUG`, `CMD_PTRACE_MMAP`, and `CMD_COMMANDLIST2` have no callable server handler.
 - Independent project; not an official Cheat Engine release.

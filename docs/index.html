@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Cheat Engine CLI (cecli) — JSON-First ceserver Client</title>
-  <meta name="description" content="Cheat Engine CLI is a JSON-first ceserver client for process discovery, memory scans, guarded writes, remote administration, and bounded debugger workflows.">
+  <title>Cheat Engine CLI (cecli) — Native macOS/Windows Memory CLI</title>
+  <meta name="description" content="Cheat Engine CLI is a JSON-first native macOS and Windows process-memory CLI with remote ceserver compatibility, exact scans, and guarded writes.">
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
   <meta name="theme-color" content="#07111f">
   <link rel="canonical" href="https://chengyixu.github.io/cheat-engine-cli/">
@@ -12,15 +12,15 @@
   <link rel="manifest" href="site.webmanifest">
   <link rel="stylesheet" href="assets/site.css">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Cheat Engine CLI — JSON-First ceserver Client">
-  <meta property="og:description" content="Script authorized process inspection, memory scans, guarded writes, symbols, pipes, and bounded debugger events with stable JSON.">
+  <meta property="og:title" content="Cheat Engine CLI — Native macOS/Windows Memory CLI">
+  <meta property="og:description" content="Inspect local macOS or Windows processes with --native, or connect to ceserver remotely, using stable JSON and guarded writes.">
   <meta property="og:image" content="https://chengyixu.github.io/cheat-engine-cli/assets/og-image.svg">
   <meta property="og:url" content="https://chengyixu.github.io/cheat-engine-cli/">
   <meta property="og:site_name" content="Cheat Engine CLI">
   <meta property="og:locale" content="en_US">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Cheat Engine CLI — JSON-First ceserver Client">
-  <meta name="twitter:description" content="Process discovery, memory scans, guarded writes, remote administration, and bounded debugger workflows through Cheat Engine ceserver.">
+  <meta name="twitter:title" content="Cheat Engine CLI — Native macOS/Windows Memory CLI">
+  <meta name="twitter:description" content="Native local process discovery, memory scans, and guarded writes on macOS and Windows, plus remote Cheat Engine ceserver compatibility.">
   <meta name="twitter:image" content="https://chengyixu.github.io/cheat-engine-cli/assets/og-image.svg">
   <script type="application/ld+json">
   {
@@ -31,7 +31,7 @@
         "@id": "https://chengyixu.github.io/cheat-engine-cli/#software",
         "name": "Cheat Engine CLI",
         "alternateName": "cecli",
-        "description": "A JSON-first command-line client for authorized process inspection, memory scanning, remote administration, and bounded debugger workflows through the upstream Cheat Engine ceserver protocol.",
+        "description": "A JSON-first command-line interface for authorized native macOS and Windows process-memory workflows plus remote administration and debugging through the upstream Cheat Engine ceserver protocol.",
         "applicationCategory": "DeveloperApplication",
         "applicationSubCategory": "Process memory inspection CLI",
         "operatingSystem": "Windows, macOS, Linux",
@@ -47,6 +47,7 @@
         "author": {"@type": "Person", "name": "Wilson Xu", "url": "https://github.com/chengyixu"},
         "featureList": [
           "JSON-first command output",
+          "Native macOS and Windows process discovery and memory access",
           "ceserver process discovery",
           "Module and thread enumeration",
           "Bounded debugger event tracing",
@@ -67,7 +68,7 @@
         "@type": "HowTo",
         "@id": "https://chengyixu.github.io/cheat-engine-cli/#quick-start-howto",
         "name": "Build Cheat Engine CLI and perform a first typed memory read",
-        "description": "Build cecli, start an authorized ceserver target, discover a process, and read one typed value as structured JSON.",
+        "description": "Build cecli, select a native macOS or Windows target or a remote ceserver, discover a process, and read one typed value as structured JSON.",
         "totalTime": "PT15M",
         "tool": [
           {"@type": "HowToTool", "name": "Git"},
@@ -75,13 +76,13 @@
           {"@type": "HowToTool", "name": "GNU Make"}
         ],
         "supply": [
-          {"@type": "HowToSupply", "name": "An authorized Linux or Android target that can run ceserver"},
+          {"@type": "HowToSupply", "name": "An authorized native macOS/Windows process or Linux/Android ceserver target"},
           {"@type": "HowToSupply", "name": "A target process ID and readable address"}
         ],
         "step": [
           {"@type": "HowToStep", "position": 1, "name": "Build cecli", "text": "Clone the repository and run make build. The expected result is a runnable bin/cecli binary.", "url": "https://chengyixu.github.io/cheat-engine-cli/#quick-start"},
-          {"@type": "HowToStep", "position": 2, "name": "Start ceserver", "text": "Build and start the bundled upstream ceserver on an authorized target. The expected result is a server listening on port 52736 unless configured otherwise.", "url": "https://chengyixu.github.io/cheat-engine-cli/#quick-start"},
-          {"@type": "HowToStep", "position": 3, "name": "Discover the process", "text": "Run server info, process list, and memory regions. The expected result is a verified connection plus a target PID and mapped readable region.", "url": "https://chengyixu.github.io/cheat-engine-cli/#quick-start"},
+          {"@type": "HowToStep", "position": 2, "name": "Select the target mode", "text": "Use --native on macOS or Windows, or start ceserver and provide --endpoint for a remote target.", "url": "https://chengyixu.github.io/cheat-engine-cli/#quick-start"},
+          {"@type": "HowToStep", "position": 3, "name": "Discover the process", "text": "Run server info, process list, and memory regions with the selected target mode. The expected result is a verified target plus a PID and mapped readable region.", "url": "https://chengyixu.github.io/cheat-engine-cli/#quick-start"},
           {"@type": "HowToStep", "position": 4, "name": "Read a typed value", "text": "Run memory read with the PID, address, typed format, and value type. The expected result is a successful JSON envelope containing the decoded value.", "url": "https://chengyixu.github.io/cheat-engine-cli/#quick-start"}
         ]
       },
@@ -92,7 +93,7 @@
           {
             "@type": "Question",
             "name": "What is Cheat Engine CLI?",
-            "acceptedAnswer": {"@type": "Answer", "text": "Cheat Engine CLI is an independent command-line client that exposes the upstream Cheat Engine ceserver process and memory protocol as structured, scriptable commands for authorized debugging, interoperability testing, modding, research, CI, and AI-agent workflows."}
+            "acceptedAnswer": {"@type": "Answer", "text": "Cheat Engine CLI is an independent command-line interface with native macOS and Windows process-memory access plus remote Cheat Engine ceserver compatibility."}
           },
           {
             "@type": "Question",
@@ -102,7 +103,7 @@
           {
             "@type": "Question",
             "name": "Does cecli work without ceserver?",
-            "acceptedAnswer": {"@type": "Answer", "text": "Not in the current release. The backend connects to ceserver, including localhost deployments. Native local-process backends are planned."}
+            "acceptedAnswer": {"@type": "Answer", "text": "Yes on macOS and Windows with --native. Remote Linux and Android targets continue to use ceserver."}
           },
           {
             "@type": "Question",
@@ -147,7 +148,7 @@
       <div>
         <p class="eyebrow">Independent · Protocol compatible · Agent native</p>
         <h1>Cheat Engine workflows, now scriptable.</h1>
-        <p class="lead">`cecli` turns the upstream Cheat Engine <code>ceserver</code> protocol into stable commands for process discovery, memory maps, typed reads, exact scans, confirmation-gated writes, and bounded debugger workflows.</p>
+        <p class="lead"><code>cecli --native</code> inspects eligible local macOS or Windows processes. The same command surface connects to upstream Cheat Engine <code>ceserver</code> or an optional <code>cebridge</code> for remote and VM workflows.</p>
         <div class="actions">
           <a class="button primary" href="https://github.com/chengyixu/cheat-engine-cli">View source</a>
           <a class="button" href="command-reference.md">Command reference</a>
@@ -172,7 +173,7 @@ $ cecli memory read \
         <p class="eyebrow">Core capabilities</p>
         <h2>A small binary with a strict automation contract.</h2>
         <div class="grid">
-          <article class="card"><span class="number">01</span><h3>Inspect</h3><p>List processes, architectures, modules, threads, and mapped memory regions exposed by an authorized `ceserver`.</p></article>
+          <article class="card"><span class="number">01</span><h3>Inspect</h3><p>List native macOS or Windows processes and mapped memory regions, or use the full remote discovery surface exposed by an authorized <code>ceserver</code>.</p></article>
           <article class="card"><span class="number">02</span><h3>Read &amp; decode</h3><p>Read bounded ranges and decode integers, floats, UTF-8, UTF-16LE, hexadecimal, or base64.</p></article>
           <article class="card"><span class="number">03</span><h3>Scan exactly</h3><p>Find typed values or byte patterns with whole-byte wildcards, alignment, range, protection, and result limits.</p></article>
           <article class="card"><span class="number">04</span><h3>Write deliberately</h3><p>Preview without connecting, require explicit confirmation, and optionally verify writes through read-back comparison.</p></article>
@@ -193,6 +194,7 @@ $ cecli memory read \
               <tr><th scope="row">Interactive visual exploration</th><td>Excellent</td><td>Focused command workflows</td></tr>
               <tr><th scope="row">Shell scripts and CI</th><td>UI automation required</td><td>Native</td></tr>
               <tr><th scope="row">Stable machine-readable output</th><td>Not the primary interface</td><td>JSON by default</td></tr>
+              <tr><th scope="row">Local macOS and Windows memory</th><td>Platform GUI</td><td><code>--native</code></td></tr>
               <tr><th scope="row">Remote Linux and Android targets</th><td>Through <code>ceserver</code></td><td>Through <code>ceserver</code></td></tr>
               <tr><th scope="row">AI-agent integration</th><td>External UI control</td><td>Typed help, rules, skills, structured errors</td></tr>
               <tr><th scope="row">Non-interactive mutation safety</th><td>Manual confirmation workflow</td><td><code>--dry-run</code>, <code>--yes</code>, and <code>--verify</code></td></tr>
@@ -206,18 +208,22 @@ $ cecli memory read \
       <div class="wrap">
         <p class="eyebrow">Quick start</p>
         <h2>From clone to first typed read.</h2>
-        <p class="lead">Prerequisites: Git, Go 1.24+, GNU Make, and an authorized Linux or Android target that can run the bundled upstream <code>ceserver</code>. You also need permission to inspect the selected process.</p>
+        <p class="lead">Prerequisites: Git, Go 1.24+, GNU Make, and permission to inspect the selected process. Use native mode on macOS or Windows; use <code>ceserver</code> for remote Linux or Android targets.</p>
         <div class="steps">
           <article class="step"><div><h3>Build</h3><pre><code>git clone https://github.com/chengyixu/cheat-engine-cli.git
 cd cheat-engine-cli
 make build</code></pre><p class="muted"><strong>Expected:</strong> <code>bin/cecli</code> exists and <code>./bin/cecli version</code> returns a successful JSON envelope.</p></div></article>
-          <article class="step"><div><h3>Start the upstream server</h3><pre><code>cd "Cheat Engine/ceserver/gcc"
-make
-sudo ./ceserver</code></pre><p class="muted"><strong>Expected:</strong> <code>ceserver</code> listens on port <code>52736</code> unless you configured another endpoint.</p></div></article>
-          <article class="step"><div><h3>Discover and inspect</h3><pre><code>./bin/cecli server info --human
-./bin/cecli process list --human
-./bin/cecli memory regions --pid 4242 --human</code></pre><p class="muted"><strong>Expected:</strong> a verified connection, a target PID, and at least one readable mapped region.</p></div></article>
-          <article class="step"><div><h3>Read a value</h3><pre><code>./bin/cecli memory read --pid 4242 \
+          <article class="step"><div><h3>Select local or remote</h3><pre><code># macOS: build and debugger-sign
+make sign-macos-native
+
+# Local macOS or Windows
+./bin/cecli --native server info
+
+# Remote alternative
+./bin/cecli --endpoint host:52736 server info</code></pre><p class="muted"><strong>Expected:</strong> <code>local://darwin</code>, <code>local://windows</code>, or the configured remote endpoint.</p></div></article>
+          <article class="step"><div><h3>Discover and inspect</h3><pre><code>./bin/cecli --native process list --human
+./bin/cecli --native memory regions --pid 4242 --human</code></pre><p class="muted"><strong>Expected:</strong> a target PID and at least one readable mapped region.</p></div></article>
+          <article class="step"><div><h3>Read a value</h3><pre><code>./bin/cecli --native memory read --pid 4242 \
   --address 0x7FF612340120 \
   --format typed --type f32</code></pre><p class="muted"><strong>Expected:</strong> stdout contains a successful JSON envelope whose <code>data.data</code> field is the decoded value.</p></div></article>
         </div>
@@ -228,7 +234,7 @@ sudo ./ceserver</code></pre><p class="muted"><strong>Expected:</strong> <code>ce
       <div class="wrap">
         <p class="eyebrow">Fail-closed mutation</p>
         <h2>Writes require a deliberate two-step workflow.</h2>
-        <div class="notice"><strong>Authorized use only.</strong> Process memory can contain credentials, personal data, and proprietary material. Keep `ceserver` on trusted networks and inspect only systems and processes you own or are explicitly permitted to test.</div>
+        <div class="notice"><strong>Authorized use only.</strong> Process memory can contain credentials, personal data, and proprietary material. Keep remote transports on trusted networks and inspect only systems and processes you own or are explicitly permitted to test.</div>
         <pre><code># No network connection; review encoded bytes first
 cecli memory write --pid 4242 --address 0x1000 \
   --type i32 --value 999 --dry-run
@@ -243,9 +249,9 @@ cecli memory write --pid 4242 --address 0x1000 \
       <div class="wrap">
         <p class="eyebrow">FAQ</p>
         <h2>Direct answers for evaluators and AI search.</h2>
-        <details open><summary>What is Cheat Engine CLI?</summary><p>Cheat Engine CLI is an independent command-line client that exposes the upstream Cheat Engine `ceserver` process and memory protocol as structured, scriptable commands for authorized debugging, interoperability testing, modding, research, CI, and AI-agent workflows.</p></details>
+        <details open><summary>What is Cheat Engine CLI?</summary><p>Cheat Engine CLI is an independent command-line interface with native macOS and Windows process-memory access plus remote Cheat Engine <code>ceserver</code> compatibility.</p></details>
         <details><summary>Does `cecli` replace the Cheat Engine GUI?</summary><p>No. The GUI remains stronger for interactive visual exploration, disassembly, tables, and long-lived debugging. `cecli` focuses on deterministic remote inspection, bounded event traces, and automation.</p></details>
-        <details><summary>Does `cecli` work without `ceserver`?</summary><p>Not in the current release. The backend connects to `ceserver`, including localhost deployments. Native local-process backends are planned.</p></details>
+        <details><summary>Does `cecli` work without `ceserver`?</summary><p>Yes on macOS and Windows with <code>--native</code>. Remote Linux and Android targets continue to use <code>ceserver</code>.</p></details>
         <details><summary>How does `cecli` make memory writes safer?</summary><p>Writes fail without <code>--yes</code>. The <code>--dry-run</code> flag performs no connection or mutation, and <code>--verify</code> reads bytes back for comparison.</p></details>
         <details><summary>Is `cecli` an official Cheat Engine project?</summary><p>No. It is an independent project based on protocol compatibility with the upstream source and clearly retains upstream attribution.</p></details>
       </div>

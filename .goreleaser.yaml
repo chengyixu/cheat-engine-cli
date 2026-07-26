@@ -14,7 +14,6 @@ builds:
     env:
       - CGO_ENABLED=0
     goos:
-      - darwin
       - linux
       - windows
     goarch:
@@ -49,6 +48,8 @@ archives:
       - NOTICE.md
       - SECURITY.md
       - docs/command-reference.md
+      - build/macos-debugger.entitlements
+      - scripts/sign-macos-native.sh
 
 checksum:
   name_template: checksums.txt

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -20,6 +21,8 @@ const defaultEndpoint = "127.0.0.1:52736"
 
 type globalOptions struct {
 	endpoint       string
+	native         bool
+	endpointSet    bool
 	connectionName string
 	timeout        time.Duration
 	human          bool
@@ -116,8 +119,16 @@ func (application *app) execute(arguments []string) (commandResult, error) {
 func parseGlobalOptions(arguments []string) (globalOptions, []string, error) {
 	options := globalOptions{
 		endpoint:       envOrDefault("CECLI_ENDPOINT", defaultEndpoint),
+		endpointSet:    os.Getenv("CECLI_ENDPOINT") != "",
 		connectionName: os.Getenv("CECLI_CONNECTION_NAME"),
 		timeout:        30 * time.Second,
+	}
+	if configuredNative := os.Getenv("CECLI_NATIVE"); configuredNative != "" {
+		parsedNative, err := strconv.ParseBool(configuredNative)
+		if err != nil {
+			return options, nil, usageError("invalid CECLI_NATIVE", "Use true or false.")
+		}
+		options.native = parsedNative
 	}
 	if strings.EqualFold(os.Getenv("CECLI_OUTPUT"), "human") {
 		options.human = true
@@ -151,6 +162,8 @@ func parseGlobalOptions(arguments []string) (globalOptions, []string, error) {
 			options.quiet = true
 		case argument == "--dry-run":
 			options.dryRun = true
+		case argument == "--native":
+			options.native = true
 		case argument == "--help" || argument == "-h":
 			options.help = true
 		case argument == "--version" || argument == "-v":
@@ -175,12 +188,14 @@ func parseGlobalOptions(arguments []string) (globalOptions, []string, error) {
 			options.fields = append(options.fields, fields...)
 		case strings.HasPrefix(argument, "--endpoint="):
 			options.endpoint = strings.TrimPrefix(argument, "--endpoint=")
+			options.endpointSet = true
 		case argument == "--endpoint":
 			index++
 			if index >= len(arguments) {
 				return options, nil, missingRequired("--endpoint value", "Use --endpoint 127.0.0.1:52736.")
 			}
 			options.endpoint = arguments[index]
+			options.endpointSet = true
 		case strings.HasPrefix(argument, "--connection-name="):
 			options.connectionName = strings.TrimPrefix(argument, "--connection-name=")
 		case argument == "--connection-name":
@@ -212,6 +227,9 @@ func parseGlobalOptions(arguments []string) (globalOptions, []string, error) {
 	if strings.TrimSpace(options.endpoint) == "" {
 		return options, nil, usageError("endpoint cannot be empty", "Use --endpoint host:port.")
 	}
+	if options.native && options.endpointSet {
+		return options, nil, usageError("--native and --endpoint cannot be combined", "Use --native for processes on this computer or --endpoint host:port for a remote target.")
+	}
 	if strings.ContainsRune(options.connectionName, 0) {
 		return options, nil, usageError("connection name contains a NUL byte", "Use a normal diagnostic name.")
 	}
@@ -225,6 +243,13 @@ func parseGlobalOptions(arguments []string) (globalOptions, []string, error) {
 		return options, nil, usageError("--quiet and --fields cannot be combined", "Choose silent output or a filtered JSON response.")
 	}
 	return options, remaining, nil
+}
+
+func (application *app) endpointLabel() string {
+	if application.options.native {
+		return "local://" + runtime.GOOS
+	}
+	return application.options.endpoint
 }
 
 func commandName(arguments []string) string {

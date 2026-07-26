@@ -1,11 +1,12 @@
 # Cheat Engine CLI command reference
 
-`cecli` is a stateless client for Cheat Engine `ceserver`. Every process operation opens the target, performs one bounded task, and closes the remote handle. JSON is the default output mode; add `--human` for terminal tables and hex dumps.
+`cecli` is a stateless process-memory interface with native macOS and Windows access plus remote Cheat Engine `ceserver` compatibility. Every process operation opens the target, performs one bounded task, and closes the handle. JSON is the default output mode; add `--human` for terminal tables and hex dumps.
 
 ## Global options
 
 | Option | Purpose |
 |---|---|
+| `--native` | Inspect processes on the current macOS or Windows computer; env: `CECLI_NATIVE=true`. Mutually exclusive with `--endpoint`. |
 | `--endpoint host:port` | Select the `ceserver` endpoint. Defaults to `127.0.0.1:52736`; env: `CECLI_ENDPOINT`. |
 | `--connection-name text` | Send a diagnostic name after each connection; env: `CECLI_CONNECTION_NAME`. |
 | `--timeout duration` | Set the per-network-operation deadline. Defaults to `30s`; env: `CECLI_TIMEOUT`. |
@@ -52,11 +53,26 @@ Generated Bash, Zsh, and Fish completions include nested subcommands and command
 source <(cecli completion bash --human)
 ```
 
+## Target selection
+
+Use native mode when the CLI and target process run on the same supported operating system:
+
+```bash
+cecli --native server info
+cecli --native process list --filter game
+cecli --native memory regions --pid 4242
+cecli --native memory scan --pid 4242 --type i32 --value 100 --protection writable
+```
+
+Windows native mode uses `OpenProcess`, `VirtualQueryEx`, `ReadProcessMemory`, and `WriteProcessMemory`. macOS native mode uses `task_for_pid` and `mach_vm_*`; run `make sign-macos-native` first. SIP-protected processes remain unavailable, and higher-integrity Windows targets may require an elevated terminal.
+
+Native mode currently supports server identity/path, process discovery, architecture, regions, reads, portable scans, and guarded writes. Use `--endpoint host:port` for the full remote `ceserver` command set or for an optional `cebridge` running inside another Windows/macOS machine or VM.
+
 ## Server
 
 ### `cecli server info`
 
-Returns the `ceserver` protocol number, version string, endpoint, and ABI family.
+Returns the selected native or remote transport's protocol number, version string, endpoint label, and ABI family.
 
 ```bash
 cecli server info --endpoint 192.168.1.50:52736 --pretty

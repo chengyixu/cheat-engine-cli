@@ -1,6 +1,6 @@
 ---
 name: getting-started
-description: Connect to ceserver and inspect the available target processes.
+description: Select a native or remote target and inspect its available processes.
 ---
 
-Run `cecli server info`, then `cecli process list`. Set a non-default endpoint with `--endpoint host:port` or `CECLI_ENDPOINT`. JSON is the default output; add `--human` for terminal-oriented tables.
+For a local macOS or Windows target, run `cecli --native server info`, then `cecli --native process list`. On macOS, build and sign first with `make sign-macos-native`. For a remote target, use `--endpoint host:port` or `CECLI_ENDPOINT`. JSON is the default output; add `--human` for terminal-oriented tables.

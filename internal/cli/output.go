@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"runtime"
 	"strings"
 	"time"
 
@@ -50,7 +51,7 @@ func (application *app) writeSuccess(command string, result commandResult, start
 		"duration_ms": time.Since(startedAt).Milliseconds(),
 	}
 	if commandUsesServer(command) {
-		meta["endpoint"] = application.options.endpoint
+		meta["endpoint"] = application.endpointLabel()
 	}
 	for key, value := range result.Meta {
 		meta[key] = value
@@ -76,6 +77,15 @@ func (application *app) writeSuccess(command string, result commandResult, start
 
 func (application *app) writeError(command string, err error) int {
 	normalized := normalizeError(err)
+	if application.options.native && normalized.Code == "CESERVER_PROTOCOL_ERROR" && strings.Contains(normalized.Message, "open process") {
+		normalized.Code = "NATIVE_PROCESS_UNAVAILABLE"
+		normalized.Message = strings.Replace(normalized.Message, "ceserver open process:", "could not open local process:", 1)
+		if runtime.GOOS == "darwin" {
+			normalized.Suggestion = "Confirm the PID and permissions. Build and sign with 'make sign-macos-native'; macOS still blocks SIP-protected processes."
+		} else if runtime.GOOS == "windows" {
+			normalized.Suggestion = "Confirm the PID and run the terminal elevated when the target has higher integrity; protected processes remain unavailable."
+		}
+	}
 	if application.options.quiet {
 		return normalized.ExitCode
 	}

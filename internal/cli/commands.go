@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"runtime"
 	"sort"
 	"strconv"
 	"strings"
@@ -17,6 +18,7 @@ import (
 	agentdocs "github.com/chengyixu/cheat-engine-cli"
 	"github.com/chengyixu/cheat-engine-cli/internal/ceserver"
 	"github.com/chengyixu/cheat-engine-cli/internal/feedback"
+	"github.com/chengyixu/cheat-engine-cli/internal/localbridge"
 	"github.com/chengyixu/cheat-engine-cli/internal/memory"
 )
 
@@ -87,9 +89,9 @@ func (application *app) executeServer(arguments []string) (commandResult, error)
 		if err := parseFlags(flagSet, arguments[1:]); err != nil {
 			return commandResult{}, err
 		}
-		preview := map[string]any{"endpoint": application.options.endpoint, "dry_run": application.options.dryRun}
+		preview := map[string]any{"endpoint": application.endpointLabel(), "dry_run": application.options.dryRun}
 		if application.options.dryRun {
-			return commandResult{Data: preview, Human: "DRY RUN\nTerminate ceserver at " + application.options.endpoint}, nil
+			return commandResult{Data: preview, Human: "DRY RUN\nTerminate ceserver at " + application.endpointLabel()}, nil
 		}
 		if err := requireYes(*yes, "ceserver termination", preview); err != nil {
 			return commandResult{}, err
@@ -103,7 +105,7 @@ func (application *app) executeServer(arguments []string) (commandResult, error)
 			return commandResult{}, err
 		}
 		preview["dry_run"] = false
-		return commandResult{Data: preview, Human: "Termination command sent to " + application.options.endpoint}, nil
+		return commandResult{Data: preview, Human: "Termination command sent to " + application.endpointLabel()}, nil
 	default:
 		return commandResult{}, usageError(fmt.Sprintf("unknown server subcommand %q", arguments[0]), "Use info, path, connection-name, options, or terminate.")
 	}
@@ -1280,13 +1282,17 @@ func (application *app) executeSelfCheck(arguments []string) (commandResult, err
 		checks = append(checks, map[string]any{"name": "issue_store", "ok": true})
 	}
 	if *checkServer {
+		checkName := "ceserver"
+		if application.options.native {
+			checkName = "native_target"
+		}
 		client, err := application.dial()
 		if err != nil {
-			checks = append(checks, map[string]any{"name": "ceserver", "ok": false, "error": err.Error()})
+			checks = append(checks, map[string]any{"name": checkName, "ok": false, "error": err.Error()})
 		} else {
 			_, infoErr := client.ServerInfo()
 			client.Close()
-			checks = append(checks, map[string]any{"name": "ceserver", "ok": infoErr == nil, "error": errorString(infoErr)})
+			checks = append(checks, map[string]any{"name": checkName, "ok": infoErr == nil, "error": errorString(infoErr)})
 		}
 	}
 	allPassed := true
@@ -1302,9 +1308,25 @@ func (application *app) executeSelfCheck(arguments []string) (commandResult, err
 }
 
 func (application *app) dial() (*ceserver.Client, error) {
-	client, err := ceserver.Dial(application.context, application.options.endpoint, application.options.timeout)
-	if err != nil {
-		return nil, err
+	var client *ceserver.Client
+	if application.options.native {
+		if err := application.context.Err(); err != nil {
+			return nil, err
+		}
+		backend, err := localbridge.NewSystemBackend()
+		if err != nil {
+			return nil, err
+		}
+		clientConnection, serverConnection := net.Pipe()
+		server := &localbridge.Server{Backend: backend, VersionName: "cecli-local-" + runtime.GOOS}
+		go server.ServeConnection(serverConnection)
+		client = ceserver.NewClient(clientConnection, application.endpointLabel(), application.options.timeout)
+	} else {
+		var err error
+		client, err = ceserver.Dial(application.context, application.options.endpoint, application.options.timeout)
+		if err != nil {
+			return nil, err
+		}
 	}
 	if application.options.connectionName != "" {
 		if err := client.SetConnectionName(application.options.connectionName); err != nil {

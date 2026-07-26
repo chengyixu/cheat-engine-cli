@@ -4,7 +4,7 @@
 
 <h1 align="center">Cheat Engine CLI</h1>
 
-<p align="center"><strong>Scriptable process and memory inspection through the upstream Cheat Engine <code>ceserver</code> protocol.</strong></p>
+<p align="center"><strong>Native macOS and Windows process-memory workflows, plus remote Cheat Engine <code>ceserver</code> compatibility.</strong></p>
 
 <p align="center">
   <a href="https://github.com/chengyixu/cheat-engine-cli/actions/workflows/cli.yml"><img alt="CLI workflow" src="https://github.com/chengyixu/cheat-engine-cli/actions/workflows/cli.yml/badge.svg"></a>
@@ -16,7 +16,7 @@
 > [!IMPORTANT]
 > **Independent project.** `cecli` is not an official Cheat Engine command-line edition. It interoperates with the upstream `ceserver` protocol and keeps the original Cheat Engine source in this repository for traceability. See [Notices and licensing status](NOTICE.md) before redistribution.
 
-Cheat Engine CLI (`cecli`) is a cross-platform, JSON-first command-line client for authorized process inspection and memory workflows. It turns the packed protocol implemented by Cheat Engine `ceserver` into stable commands for process discovery, module and thread enumeration, memory maps, typed reads, exact scans, and confirmation-gated writes.
+Cheat Engine CLI (`cecli`) is a cross-platform, JSON-first command-line interface for authorized process inspection and memory workflows. Run `cecli --native` on macOS to inspect macOS processes or on Windows to inspect Windows processes. Use `--endpoint` when connecting to an upstream Cheat Engine `ceserver` or the optional `cebridge` transport on another machine or VM.
 
 ## Why `cecli`?
 
@@ -25,6 +25,7 @@ Cheat Engine CLI (`cecli`) is a cross-platform, JSON-first command-line client f
 | Interactive exploration | Excellent | Focused |
 | Shell scripts and CI | Limited | Native |
 | Stable JSON output | No | Default |
+| Local macOS/Windows memory | Platform GUI | `--native` |
 | Remote Linux/Android targets | Via `ceserver` | Via `ceserver` |
 | AI-agent integration | UI automation required | Embedded rules, skills, and structured errors |
 | Safe non-interactive writes | Manual workflow | `--dry-run`, `--yes`, and `--verify` |
@@ -32,6 +33,7 @@ Cheat Engine CLI (`cecli`) is a cross-platform, JSON-first command-line client f
 ## Highlights
 
 - **Upstream protocol compatibility** — packet layouts are derived from `Cheat Engine/ceserver/ceserver.h`, `api.h`, and `networkInterface.pas`.
+- **Native local memory access** — process discovery, regions, reads, exact scans, and guarded writes run in-process on macOS and Windows with `--native`.
 - **Process inventory** — list processes, modules, threads, architecture, and mapped memory regions.
 - **Typed memory reads** — decode signed/unsigned integers, floats, UTF-8, UTF-16LE, hex, or base64.
 - **Portable exact scanner** — scan byte patterns with `??` wildcards or encoded values with alignment and protection filters.
@@ -53,7 +55,26 @@ make build
 ./bin/cecli --human --help
 ```
 
-### 2. Start `ceserver`
+### 2A. Inspect a local macOS or Windows target
+
+On Windows, build normally and add `--native` to local process and memory commands. On macOS, the Mach task APIs also require a debugger-signed CLI; the helper selects an installed Apple Development or Developer ID identity:
+
+```bash
+# macOS
+make sign-macos-native
+./bin/cecli --native server info --human
+./bin/cecli --native process list --filter game --human
+
+# Windows PowerShell
+go build -o bin/cecli.exe ./cmd/cecli
+./bin/cecli.exe --native process list --filter game --human
+```
+
+macOS may still deny SIP-protected or otherwise restricted processes. Windows may require an elevated terminal when the target runs at higher integrity.
+
+Native mode currently covers server identity/path, process discovery, architecture, memory regions, bounded reads, portable exact scans, and confirmation-gated writes. Commands for remote files, pipes, modules, threads, debugger sessions, allocation, and protection changes remain `ceserver`-only.
+
+### 2B. Connect to a remote target
 
 Build and run the upstream server on an authorized Linux or Android target:
 
@@ -68,7 +89,7 @@ The upstream default port is `52736`. Restrict network access with a host firewa
 ### 3. Inspect a target
 
 ```bash
-# Verify the server
+# Verify the selected target; add --native for this computer
 ./bin/cecli server info --human
 
 # Find the target PID
@@ -189,6 +210,7 @@ Precedence is command flag, environment variable, then default.
 
 | Setting | Flag | Environment | Default |
 |---|---|---|---|
+| Native local target | `--native` | `CECLI_NATIVE=true` | Disabled |
 | `ceserver` endpoint | `--endpoint` | `CECLI_ENDPOINT` | `127.0.0.1:52736` |
 | Connection name | `--connection-name` | `CECLI_CONNECTION_NAME` | Unset |
 | Network timeout | `--timeout` | `CECLI_TIMEOUT` | `30s` |
@@ -203,14 +225,18 @@ Precedence is command flag, environment variable, then default.
 make check      # go test ./... + go vet ./...
 make race       # race detector
 make smoke      # build + JSON contract smoke tests
+make sign-macos-native # build and debugger-sign the macOS CLI
 make snapshot   # local GoReleaser snapshot
+make snapshot-darwin # cgo-enabled arm64 + x86_64 macOS archives
 ```
+
+Darwin release archives are built on a macOS runner with CGO enabled and include `scripts/sign-macos-native.sh`. Signing is intentionally performed on the user or distributor machine because debugger-entitled binaries require an appropriate local Apple signing identity.
 
 The test suite includes a fake TCP `ceserver` that verifies packed request widths and responses for process/module/thread enumeration, regions, reads, writes, client/server scans, connection naming, server termination, debugger events, breakpoints, contexts, extension controls, named pipes, remote files, and compressed symbols. No privileged live process is required for unit tests.
 
 ## Current scope
 
-The CLI covers every non-obsolete command dispatched by the bundled upstream `ceserver`, including connection naming, guarded remote termination, and the server-side AOB packet. The safer portable scanner remains the default; `memory aobscan` exists for explicit packet compatibility and requires `--yes`. Legacy process/module iteration and virtual-query packets remain internal or superseded by richer packet variants. `CMD_STOPDEBUG`, `CMD_PTRACE_MMAP`, and `CMD_COMMANDLIST2` are defined upstream but not dispatched by the server, so no working wire operation exists to expose.
+Remote mode covers every non-obsolete command dispatched by the bundled upstream `ceserver`, including connection naming, guarded remote termination, and the server-side AOB packet. Native macOS and Windows mode currently covers the process and memory operations needed for discovery, regions, reads, portable exact scans, and guarded writes. The safer portable scanner remains the default; `memory aobscan` exists for explicit remote packet compatibility and requires `--yes`.
 
 ## Responsible use
 
@@ -220,15 +246,15 @@ Use this software only on systems, applications, games, and processes you own or
 
 ### What is Cheat Engine CLI?
 
-Cheat Engine CLI is an independent command-line client that exposes the upstream Cheat Engine `ceserver` process and memory protocol as structured, scriptable commands. It is designed for authorized debugging, interoperability testing, modding, research, CI, and AI-agent workflows.
+Cheat Engine CLI is an independent command-line interface with native macOS and Windows process-memory access plus compatibility with the upstream Cheat Engine `ceserver` protocol. It is designed for authorized debugging, interoperability testing, modding, research, CI, and AI-agent workflows.
 
 ### Does `cecli` replace the Cheat Engine GUI?
 
-No. The GUI remains better for interactive disassembly, table editing, debugger workflows, and visual exploration. `cecli` focuses on deterministic remote inspection, exact scans, typed reads, guarded writes, and automation.
+No. The GUI remains better for interactive disassembly, table editing, debugger workflows, and visual exploration. `cecli` focuses on deterministic local or remote inspection, exact scans, typed reads, guarded writes, and automation.
 
 ### Does it work locally without `ceserver`?
 
-Not yet. The current backend connects to `ceserver`, including localhost deployments. Native Windows, macOS, and Linux process backends are roadmap items.
+Yes on macOS and Windows. Add `--native` to inspect eligible processes on the same operating system without starting `ceserver`. Remote Linux and Android targets continue to use `ceserver`; native Linux access remains a roadmap item.
 
 ### Is memory writing enabled by default?
 
@@ -240,7 +266,7 @@ No. It is an independent project based on protocol compatibility with the upstre
 
 ## Roadmap
 
-- Native local-process backends for Windows, macOS, and Linux.
+- Native local-process backend for Linux.
 - Scan sessions with unknown-initial-value and changed/unchanged refinement.
 - Pointer scan workflows and reusable address tables.
 - Symbol-name lookup and module-relative address expressions.

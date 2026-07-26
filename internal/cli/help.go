@@ -32,6 +32,7 @@ type globalOptionHelp struct {
 }
 
 var globalOptionCatalog = []globalOptionHelp{
+	{Flag: "--native", Description: "inspect processes on this macOS or Windows computer; env CECLI_NATIVE"},
 	{Flag: "--endpoint host:port", Description: "ceserver endpoint; env CECLI_ENDPOINT; default 127.0.0.1:52736"},
 	{Flag: "--connection-name text", Description: "diagnostic name sent after connecting; env CECLI_CONNECTION_NAME"},
 	{Flag: "--timeout duration", Description: "network timeout; env CECLI_TIMEOUT; default 30s"},
@@ -47,8 +48,8 @@ var globalOptionCatalog = []globalOptionHelp{
 }
 
 var commandCatalog = []commandHelp{
-	{Name: "server info", Usage: "cecli server info", Description: "Show ceserver protocol and ABI information."},
-	{Name: "server path", Usage: "cecli server path", Description: "Show ceserver executable path, current path, and Android status."},
+	{Name: "server info", Usage: "cecli server info", Description: "Show the selected native or remote transport identity, protocol, and ABI."},
+	{Name: "server path", Usage: "cecli server path", Description: "Show the selected transport executable path, current path, and Android status."},
 	{Name: "server connection-name", Usage: "cecli server connection-name --name text", Description: "Set the current ceserver connection's diagnostic name."},
 	{Name: "server terminate", Usage: "cecli server terminate --yes", Description: "Terminate the remote ceserver process without a response.", Destructive: true, Constraints: []string{"the server stops immediately and all clients disconnect", "--yes is required unless --dry-run is used"}},
 	{Name: "server options list", Usage: "cecli server options list", Description: "List ceserver runtime options."},
@@ -186,7 +187,7 @@ func validateHelpCatalog() []string {
 	for _, name := range globalOptionNames() {
 		documentedGlobals[name] = true
 	}
-	for _, required := range []string{"--endpoint", "--connection-name", "--timeout", "--human", "--agent", "--pretty", "--quiet", "-q", "--fields", "--dry-run", "--help", "-h", "--version", "-v", "--brief"} {
+	for _, required := range []string{"--native", "--endpoint", "--connection-name", "--timeout", "--human", "--agent", "--pretty", "--quiet", "-q", "--fields", "--dry-run", "--help", "-h", "--version", "-v", "--brief"} {
 		if !documentedGlobals[required] {
 			problems = append(problems, "undocumented global option: "+required)
 		}

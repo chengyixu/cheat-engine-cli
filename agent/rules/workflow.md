@@ -3,7 +3,7 @@ name: workflow
 description: Safe execution sequence for process and memory operations.
 ---
 
-1. Run `cecli server info` and confirm the endpoint identity.
+1. Select exactly one target mode: `--native` for this macOS/Windows computer or `--endpoint host:port` for a remote server, then run `server info` and confirm its identity.
 2. Discover the target with `cecli process list`; never guess a PID.
 3. Inspect architecture, modules, and regions before reading memory.
 4. Use the smallest practical read or scan range.

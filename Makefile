@@ -8,13 +8,16 @@ LDFLAGS := -s -w \
 	-X github.com/chengyixu/cheat-engine-cli/internal/cli.Commit=$(COMMIT) \
 	-X github.com/chengyixu/cheat-engine-cli/internal/cli.BuildDate=$(BUILD_DATE)
 
-.PHONY: all build install test race vet check smoke clean snapshot
+.PHONY: all build sign-macos-native install test race vet check smoke clean snapshot snapshot-darwin
 
 all: check build
 
 build:
 	mkdir -p bin
 	go build -trimpath -ldflags "$(LDFLAGS)" -o bin/$(BINARY) $(PACKAGE)
+
+sign-macos-native: build
+	scripts/sign-macos-native.sh bin/$(BINARY)
 
 install:
 	go install -trimpath -ldflags "$(LDFLAGS)" $(PACKAGE)
@@ -37,6 +40,9 @@ smoke: build
 
 snapshot:
 	goreleaser release --snapshot --clean
+
+snapshot-darwin:
+	scripts/package-darwin-release.sh $(VERSION) $(COMMIT) $(BUILD_DATE) dist-darwin
 
 clean:
 	rm -rf bin dist

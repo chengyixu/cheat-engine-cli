@@ -8,6 +8,8 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/chengyixu/cheat-engine-cli/internal/ceserver"
 )
 
 func TestHelpIsJSONByDefault(t *testing.T) {
@@ -26,6 +28,44 @@ func TestHelpIsJSONByDefault(t *testing.T) {
 	}
 	if output["ok"] != true || output["command"] != "help" {
 		t.Fatalf("output = %#v", output)
+	}
+}
+
+func TestNativeAndEndpointAreMutuallyExclusive(t *testing.T) {
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	exitCode := Run(context.Background(), []string{"--native", "--endpoint", "127.0.0.1:52736", "process", "list"}, &stdout, &stderr)
+	if exitCode != 2 {
+		t.Fatalf("exitCode = %d, stderr = %s", exitCode, stderr.String())
+	}
+	if stdout.Len() != 0 || !strings.Contains(stderr.String(), "--native and --endpoint cannot be combined") {
+		t.Fatalf("stdout = %q, stderr = %q", stdout.String(), stderr.String())
+	}
+}
+
+func TestNativeEnvironmentValidation(t *testing.T) {
+	t.Setenv("CECLI_NATIVE", "sometimes")
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	exitCode := Run(context.Background(), []string{"process", "list"}, &stdout, &stderr)
+	if exitCode != 2 || !strings.Contains(stderr.String(), "invalid CECLI_NATIVE") {
+		t.Fatalf("exitCode = %d, stderr = %s", exitCode, stderr.String())
+	}
+}
+
+func TestNativeOpenFailureHasPlatformGuidance(t *testing.T) {
+	application := &app{options: globalOptions{native: true}}
+	normalized := normalizeError(&ceserver.ProtocolError{Operation: "open process", Message: "server denied or could not open PID 42"})
+	if normalized.Code != "CESERVER_PROTOCOL_ERROR" {
+		t.Fatalf("unexpected starting code %q", normalized.Code)
+	}
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	application.stdout = &stdout
+	application.stderr = &stderr
+	exitCode := application.writeError("memory read", &ceserver.ProtocolError{Operation: "open process", Message: "server denied or could not open PID 42"})
+	if exitCode != 1 || !strings.Contains(stderr.String(), "NATIVE_PROCESS_UNAVAILABLE") || !strings.Contains(stderr.String(), "permissions") {
+		t.Fatalf("exitCode = %d, stderr = %s", exitCode, stderr.String())
 	}
 }
 

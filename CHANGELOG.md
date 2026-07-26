@@ -24,6 +24,10 @@ All notable changes to Cheat Engine CLI are documented here.
 - Embedded agent rules and skills plus a local structured issue workflow.
 - Cross-platform tests, fake `ceserver` protocol coverage, GoReleaser configuration, and GitHub Actions workflows.
 - Search and AI-discovery assets including a GitHub Pages site, JSON-LD SoftwareApplication/HowTo/FAQ/Breadcrumb schemas, `llms.txt`, sitemap, robots policy, social cards, and product marketing context.
+- Native local process discovery, memory regions, reads, exact scans, and guarded writes on Windows and macOS through `cecli --native`.
+- A macOS debugger-entitlement signing helper and native-specific permission diagnostics.
+- An optional standalone `cebridge` transport for accessing the native subset across an explicitly configured machine or VM boundary.
+- Native-capable arm64 and x86_64 Darwin release archives built on macOS instead of CGO-disabled cross-compiled stubs.
 
 ### Fixed
 

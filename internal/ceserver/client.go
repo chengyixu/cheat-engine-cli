@@ -27,7 +27,11 @@ func Dial(ctx context.Context, endpoint string, timeout time.Duration) (*Client,
 	if tcpConnection, ok := connection.(*net.TCPConn); ok {
 		_ = tcpConnection.SetNoDelay(true)
 	}
-	return &Client{connection: connection, endpoint: endpoint, timeout: timeout}, nil
+	return NewClient(connection, endpoint, timeout), nil
+}
+
+func NewClient(connection net.Conn, endpoint string, timeout time.Duration) *Client {
+	return &Client{connection: connection, endpoint: endpoint, timeout: timeout}
 }
 
 func (client *Client) Close() error {
