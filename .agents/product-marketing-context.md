@@ -13,6 +13,7 @@
 - Security researchers and interoperability engineers inspecting controlled processes.
 - Cheat Engine users who need repeatable scripts instead of GUI automation.
 - AI-agent builders who require strict JSON, stable exit codes, dry-run support, and self-description.
+- English- and Simplified-Chinese-speaking users who want first-party setup and safety guidance without relying on machine translation.
 
 ## Jobs to be done
 
@@ -46,6 +47,7 @@
 - Write safety through no-connect dry runs, explicit `--yes`, and read-back verification.
 - Bounded debug traces, active-session breakpoint controls, and validated raw context round trips.
 - Standard-library Go binary with single-digit-millisecond local startup in release checks.
+- A separately installable bilingual agent skill that turns the command surface into an authorization-to-restore workflow.
 
 ## Objections and responses
 
@@ -72,7 +74,7 @@ Avoid claiming “official,” “undetectable,” “anti-cheat bypass,” or u
 
 ## Brand voice
 
-Technical, direct, safety-aware, independent, and evidence-based. Prefer exact commands, limits, protocol sources, and verified capabilities over hype.
+Technical, direct, vivid, safety-aware, independent, and evidence-based in both English and Simplified Chinese. Prefer exact commands, limits, protocol sources, and verified capabilities over hype.
 
 ## Priority discovery queries
 
@@ -86,3 +88,7 @@ Technical, direct, safety-aware, independent, and evidence-based. Prefer exact c
 8. ai agent cli process memory
 9. remote process memory reader
 10. cheat engine linux server client
+11. Cheat Engine 命令行
+12. 命令行扫描进程内存
+13. macOS 进程内存读取
+14. Windows 游戏内存扫描

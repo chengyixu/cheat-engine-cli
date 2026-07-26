@@ -7,6 +7,12 @@
 <p align="center"><strong>Native macOS and Windows process-memory workflows, plus remote Cheat Engine <code>ceserver</code> compatibility.</strong></p>
 
 <p align="center">
+  <a href="README.md">English</a> ·
+  <a href="README.zh-CN.md">简体中文</a> ·
+  <a href="https://github.com/chengyixu/cheat-engine-cli-skill">Agent Skill</a>
+</p>
+
+<p align="center">
   <a href="https://github.com/chengyixu/cheat-engine-cli/actions/workflows/cli.yml"><img alt="CLI workflow" src="https://github.com/chengyixu/cheat-engine-cli/actions/workflows/cli.yml/badge.svg"></a>
   <a href="https://github.com/chengyixu/cheat-engine-cli/releases"><img alt="GitHub release" src="https://img.shields.io/github/v/release/chengyixu/cheat-engine-cli?display_name=tag&sort=semver"></a>
   <a href="https://github.com/chengyixu/cheat-engine-cli"><img alt="Go 1.24+" src="https://img.shields.io/badge/Go-1.24%2B-00ADD8?logo=go&logoColor=white"></a>
@@ -43,6 +49,16 @@ Cheat Engine CLI (`cecli`) is a cross-platform, JSON-first command-line interfac
 - **Remote administration** — inspect server paths/options and manage authorized target files with bounded transfers.
 - **AI-native command contract** — JSON by default, stdout data only, structured stderr errors, stable exit codes, typed command help, field projection, quiet mode, `--brief`, agent rules, and local feedback.
 - **Fast, single binary** — standard-library Go implementation with no runtime dependencies.
+
+## Give your agent the playbook
+
+The companion [Cheat Engine CLI Skill](https://github.com/chengyixu/cheat-engine-cli-skill) turns this command surface into a disciplined agent workflow: authorize, discover, map, read, scan, preview, confirm, verify, and restore. It includes English and Simplified Chinese guidance for native macOS, native Windows, and remote `ceserver` targets.
+
+```bash
+npx skills add chengyixu/cheat-engine-cli-skill@cheat-engine-cli -g -y
+```
+
+The skill links back to this repository as its canonical CLI implementation and command reference.
 
 ## Quick start
 

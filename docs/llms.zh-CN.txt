@@ -1,0 +1,27 @@
+# Cheat Engine CLI
+
+> Cheat Engine CLI（`cecli`）是独立的 JSON-first 命令行接口，支持 macOS 与 Windows 本机进程内存访问，并通过上游 Cheat Engine `ceserver` 协议提供远程管理和有边界的调试工作流。
+
+## 规范来源
+
+- [简体中文 README](https://github.com/chengyixu/cheat-engine-cli/blob/master/README.zh-CN.md)：中文产品介绍、安装、命令、安全模型和常见问题。
+- [English overview](https://chengyixu.github.io/cheat-engine-cli/)：产品定义、功能、安全模型、快速开始和 FAQ。
+- [源码仓库](https://github.com/chengyixu/cheat-engine-cli)：代码、测试、Release、Issue 和上游历史。
+- [命令参考](https://github.com/chengyixu/cheat-engine-cli/blob/master/docs/command-reference.md)：命令、参数、数据类型、示例和退出码。
+- [配套 Agent Skill](https://github.com/chengyixu/cheat-engine-cli-skill)：English 与简体中文的安全操作流程。
+
+## 核心能力
+
+- 使用 `--native` 发现 macOS 与 Windows 本机进程、查看内存区域、读取、精确扫描和受保护写入
+- 使用 `--endpoint` 连接远程 Linux、Android、虚拟机中的 `ceserver` 或可选 `cebridge`
+- 类型化读取整数、浮点数、UTF-8、UTF-16LE、十六进制和 base64
+- 精确数值扫描和支持 `??` 整字节通配符的字节模式扫描
+- 通过 `--dry-run`、显式 `--yes` 和可选 `--verify` 保护内存写入
+- 默认 JSON、结构化 stderr 错误、稳定退出码、字段投影和类型化命令帮助
+- 有边界的调试事件、活动会话硬件断点和经过验证的原始线程上下文
+
+## 当前限制
+
+- 原生模式只覆盖核心进程内存子集；模块、线程、调试器控制、远程管理、分配和保护修改需要远程 `ceserver`。
+- macOS 原生访问需要调试权限签名，且不能访问 SIP 保护进程；Linux 原生后端尚未实现。
+- 本项目并非 Cheat Engine 官方版本，只能用于自己拥有或已明确获授权的目标。

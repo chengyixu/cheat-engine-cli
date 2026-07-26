@@ -5,11 +5,13 @@
 ## Canonical sources
 
 - [Product overview](https://chengyixu.github.io/cheat-engine-cli/): Definition, features, safety model, quick start, and FAQ.
+- [简体中文 README](https://github.com/chengyixu/cheat-engine-cli/blob/master/README.zh-CN.md): 中文产品介绍、安装、命令、安全模型和常见问题。
 - [Source repository](https://github.com/chengyixu/cheat-engine-cli): Code, tests, release artifacts, issues, and upstream history.
 - [Command reference](https://github.com/chengyixu/cheat-engine-cli/blob/master/docs/command-reference.md): Commands, flags, value types, examples, and exit codes.
 - [Architecture](https://github.com/chengyixu/cheat-engine-cli/blob/master/docs/architecture.md): Protocol reuse, stateless command model, scanner design, and current scope.
 - [Security policy](https://github.com/chengyixu/cheat-engine-cli/blob/master/SECURITY.md): Authorized-use expectations and reporting guidance.
 - [Notices](https://github.com/chengyixu/cheat-engine-cli/blob/master/NOTICE.md): Upstream attribution and licensing status.
+- [Companion agent skill](https://github.com/chengyixu/cheat-engine-cli-skill): English and Simplified Chinese playbooks for authorized native and remote `cecli` workflows.
 
 ## Supported capabilities
 
